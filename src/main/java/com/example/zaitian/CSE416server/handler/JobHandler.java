@@ -15,6 +15,7 @@ public class JobHandler {
     }
 
     public void deleteJob(int id){
+
         System.out.println("Delete Job: "+id);
     }
     public void cancelJob(int id){

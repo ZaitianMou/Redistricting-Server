@@ -1,3 +1,1 @@
-src/main/resources/data/GA/GA_precincts.json filter=lfs diff=lfs merge=lfs -text
-src/main/resources/data/TX/TX_precincts.json filter=lfs diff=lfs merge=lfs -text
 src/main/resources/data/VA/VA_precincts.json filter=lfs diff=lfs merge=lfs -text

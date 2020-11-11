@@ -1,6 +1,4 @@
 package com.example.zaitian.CSE416server.model;
-
-import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
@@ -8,8 +6,7 @@ import javax.persistence.Id;
 import javax.persistence.Table;
 
 @Entity
-//@Table(name="Job")
-@NoArgsConstructor
+@Table(name="Job")
 public class Job {
 
     @Id
@@ -26,6 +23,10 @@ public class Job {
         this.numberOfDistrictings = Integer.getInteger(numberOfDistrictings);
         this.compactnessLimit = Double.valueOf(compactnessLimit);
         this.populationDiffLimit = Double.valueOf(populationDiffLimit);
+    }
+
+    public Job() {
+
     }
 
     public int getId() {
@@ -67,16 +68,5 @@ public class Job {
     public void setPopulationDiffLimit(double populationDiffLimit) {
         this.populationDiffLimit = populationDiffLimit;
     }
-
-
-
-//
-//    public int getId(){
-//        return this.id;
-//    }
-//
-
-
-
 
 }

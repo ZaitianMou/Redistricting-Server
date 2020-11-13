@@ -1,19 +1,24 @@
 package com.example.zaitian.CSE416server.model;
-import lombok.NoArgsConstructor;
-
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name="Job")
+@Table(name="job")
 public class Job {
 
     @Id
-    private int id;
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+
+    @Column(name="state")
     private String state;
+
+    @Column(name ="numberOfDistrictings")
     private int numberOfDistrictings;
+
+    @Column(name= "compactnessLimit")
     private double compactnessLimit;
+
+    @Column(name="populationDiffLimit")
     private double populationDiffLimit;
 
     public Job(String id, String state, String numberOfDistrictings, String compactnessLimit, String populationDiffLimit) {
@@ -28,12 +33,16 @@ public class Job {
     public Job() {
 
     }
+    @Override
+    public String toString(){
+        return "";
+    }
 
-    public int getId() {
+    public long getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(long id) {
         this.id = id;
     }
 

@@ -11,7 +11,7 @@ import java.util.Optional;
 
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController()
-public class JobConller {
+public class JobController {
 
     @Autowired
     private JobRepository jobRepository;

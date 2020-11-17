@@ -1,81 +1,50 @@
 package com.example.zaitian.CSE416server.model;
+import lombok.Getter;
+import lombok.Setter;
 import javax.persistence.*;
 
 @Entity
 @Table(name="job")
+@Getter
+@Setter
 public class Job {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
     @Column(name="state")
     private String state;
 
-    @Column(name ="numberOfDistrictings")
+    @Column(name ="number_of_districtings")
     private int numberOfDistrictings;
 
-    @Column(name= "compactnessLimit")
+    @Column(name= "compactness_limit")
     private double compactnessLimit;
 
-    @Column(name="populationDiffLimit")
+    @Column(name="population_diff_Limit")
     private double populationDiffLimit;
 
-    public Job(String id, String state, String numberOfDistrictings, String compactnessLimit, String populationDiffLimit) {
-        System.out.println("Job Constructor!");
-        this.id = Integer.getInteger(id);
-        this.state = state;
-        this.numberOfDistrictings = Integer.getInteger(numberOfDistrictings);
-        this.compactnessLimit = Double.valueOf(compactnessLimit);
-        this.populationDiffLimit = Double.valueOf(populationDiffLimit);
-    }
+    @Column(name="status")
+    private String status; // "running","aborted","finished"
+
+    @Column(name="result_location")
+    private String resultLocation;
 
     public Job() {
-
     }
+
     @Override
     public String toString(){
-        return "";
+        return "Job id "+this.getId();
     }
 
-    public long getId() {
-        return id;
+    public void cancelRunning(){
+        this.setStatus("aborted");
+        //TODO: call the server or seawulf to cancel
     }
-
-    public void setId(long id) {
-        this.id = id;
+    public void startRunning(){
+        this.setStatus("running");
+        //TODO: call the server or seawulf to start the job
+        //hint: using process builder
     }
-
-    public String getState() {
-        return state;
-    }
-
-    public void setState(String state) {
-        this.state = state;
-    }
-
-    public int getNumberOfDistrictings() {
-        return numberOfDistrictings;
-    }
-
-    public void setNumberOfDistrictings(int numberOfDistrictings) {
-        this.numberOfDistrictings = numberOfDistrictings;
-    }
-
-    public double getCompactnessLimit() {
-        return compactnessLimit;
-    }
-
-    public void setCompactnessLimit(double compactnessLimit) {
-        this.compactnessLimit = compactnessLimit;
-    }
-
-    public double getPopulationDiffLimit() {
-        return populationDiffLimit;
-    }
-
-    public void setPopulationDiffLimit(double populationDiffLimit) {
-        this.populationDiffLimit = populationDiffLimit;
-    }
-
 }

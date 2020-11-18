@@ -2,13 +2,15 @@ package com.example.zaitian.CSE416server.model;
 import lombok.Getter;
 import lombok.Setter;
 import javax.persistence.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="job")
 @Getter
 @Setter
 public class Job {
-
     @Id
     private long id;
 
@@ -41,10 +43,23 @@ public class Job {
     public void cancelRunning(){
         this.setStatus("aborted");
         //TODO: call the server or seawulf to cancel
+
     }
-    public void startRunning(){
+    public void startRunning() throws IOException {
         this.setStatus("running");
         //TODO: call the server or seawulf to start the job
         //hint: using process builder
+        if (getNumberOfDistrictings()> Configuration.runningLocationThreshold){
+
+        }
+
+        else{
+            List<String> commandList=new ArrayList<>();
+
+
+            Process process=new ProcessBuilder(commandList).start();
+
+        }
+
     }
 }

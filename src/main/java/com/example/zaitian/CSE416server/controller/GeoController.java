@@ -11,15 +11,4 @@ import java.nio.file.Files;
 @RequestMapping("/api")
 public class GeoController {
 
-
-
-    @GetMapping("/demo/{state}")
-    String creatJob(@PathVariable String state) throws IOException {
-
-//        File resource=new ClassPathResource("data/AR/AR_boundary.geo.json").getFile();
-        File resource=ResourceUtils.getFile("classpath:data/AR/AR_boundary.geo.json");
-
-        return new String(Files.readAllBytes((resource.toPath())));
-
-    }
 }

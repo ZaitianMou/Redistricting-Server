@@ -51,14 +51,14 @@ public class Job {
         //hint: using process builder
         if (getNumberOfDistrictings()> Configuration.runningLocationThreshold){
 
-        }
+         }
 
         else{
             List<String> commandList=new ArrayList<>();
+            commandList.add("python3 ./../../../script.py");
 
-
-            Process process=new ProcessBuilder(commandList).start();
-
+            ProcessBuilder process= new ProcessBuilder("python","./../../..src/script.py");
+            //process.start()
         }
 
     }

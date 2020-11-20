@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.List;
 
 @CrossOrigin(origins = "http://localhost:3000")
@@ -15,13 +17,14 @@ public class JobController {
     JobHandler jobHandler=new JobHandler();
 
     @PostMapping("/job")
-    public ResponseEntity creatJob(@RequestBody Job newJob){
-        try {
+    public ResponseEntity createJob(@RequestBody Job newJob) throws IOException {
+       // try {
+            System.out.println("Creating a job!");
             jobHandler.createJob(newJob);
             return new ResponseEntity( HttpStatus.CREATED);
-        } catch (Exception e) {
-            return new ResponseEntity( HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+//        } catch (Exception e) {
+//            return new ResponseEntity( HttpStatus.INTERNAL_SERVER_ERROR);
+//        }
     }
 
     @GetMapping("/job/{id}")
@@ -60,10 +63,12 @@ public class JobController {
     @PatchMapping("/job/{id}/cancel")
     public ResponseEntity cancelJob(@PathVariable Long id){
         try {
+            System.out.println("Cancel job: "+id);
             Job job = jobHandler.cancelJob(id);
             return new ResponseEntity(job, HttpStatus.OK);
         }
         catch (Exception e) {
+            System.out.println("123");
             return new ResponseEntity(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 

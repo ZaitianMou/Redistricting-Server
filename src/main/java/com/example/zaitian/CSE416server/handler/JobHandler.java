@@ -4,6 +4,7 @@ import com.example.zaitian.CSE416server.model.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
 
 @Service
@@ -12,7 +13,7 @@ public class JobHandler {
     @Autowired
     private JobRepository jobRepository;
 
-    public void createJob(Job newJob){
+    public void createJob(Job newJob) throws IOException {
         newJob.startRunning();
         jobRepository.save(newJob);
     }
@@ -31,7 +32,7 @@ public class JobHandler {
     public Job cancelJob(long id){
         Job job = getJob(id);
         job.cancelRunning();
-        jobRepository.save(job);
+        jobRepository.deleteById(id);
         return job;
     }
 

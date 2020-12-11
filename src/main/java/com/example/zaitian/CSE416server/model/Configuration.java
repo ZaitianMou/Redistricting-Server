@@ -1,5 +1,13 @@
 package com.example.zaitian.CSE416server.model;
 
 public class Configuration {
-    public static int runningLocationThreshold=1000;
+    static int runningLocationThreshold=1000;
+    static int[] GA_enacted_HVAP={20552, 20871, 22234, 23458, 25359, 25429, 37115, 41075, 41299, 43366, 46831, 46883, 62706, 81824};
+    static int[] GA_enacted_WVAP={156106, 170291, 174182, 233373, 258017, 311698, 329180, 337247, 339254, 357555, 362833, 363918, 417284, 431576};
+    static int[] GA_enacted_BVAP={32845, 39916, 63904, 72579, 81104, 111311, 122589, 144600, 145558, 169050, 251197, 264345, 275786, 298162};
+    static int[] GA_enacted_AminVAP={781, 892, 954, 987, 1080, 1157, 1181, 1215, 1274, 1285, 1308, 1323, 1339, 1548};
+    static int[] GA_enacted_AsianVAP={4450, 5399, 5446, 6955, 8081, 8396, 8531, 10400, 12877, 14030, 21534, 22562, 47818, 57685};
+    static int[] GA_enacted_NHPIVAP={149, 173, 176, 187, 193, 207, 220, 226, 227, 229, 248, 402, 482, 580};
+    static int[] GA_enacted_VAP={486964, 503410, 504394, 506050, 508964, 511272, 516172, 517269, 517382, 520144, 521602, 522381, 523433, 536664};
+
 }

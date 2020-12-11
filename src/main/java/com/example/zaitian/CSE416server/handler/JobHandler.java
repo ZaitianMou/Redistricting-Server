@@ -4,12 +4,11 @@ import com.example.zaitian.CSE416server.model.Job;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.util.List;
-
 @Service
 public class JobHandler {
-
     @Autowired
     private JobRepository jobRepository;
 
@@ -17,7 +16,6 @@ public class JobHandler {
         newJob.startRunning();
         jobRepository.save(newJob);
     }
-
     public Job getJob(long id){
         return jobRepository.findById(id).get();
     }
@@ -29,11 +27,21 @@ public class JobHandler {
     public void deleteJob(long id){
         jobRepository.deleteById(id);
     }
+
     public Job cancelJob(long id){
         Job job = getJob(id);
         job.cancelRunning();
         jobRepository.deleteById(id);
         return job;
+    }
+
+    public String getJobResult(long id) throws FileNotFoundException {
+        Job job = getJob(id);
+        return job.getResult(id);
+    }
+    public String getBoxplot(long id) throws FileNotFoundException {
+        Job job = getJob(id);
+        return job.getBoxplot(id);
     }
 
 }

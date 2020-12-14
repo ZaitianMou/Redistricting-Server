@@ -9,7 +9,6 @@ import java.util.List;
 @Setter
 @AllArgsConstructor
 public class DistrictingPlan {
-
     private int districtingPlanID;
     private List<District> districts;
 
@@ -19,8 +18,7 @@ public class DistrictingPlan {
         for (District d: districts){
             s=s+d.toString();
         }
-        return "DistrictingPlan{" +
-                " districtingPlanID=" + districtingPlanID +
+        return "DistrictingPlan "+districtingPlanID+" {" +
                 s +
                 '}';
     }

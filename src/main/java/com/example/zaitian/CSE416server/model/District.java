@@ -14,17 +14,19 @@ public class District {
     private int aminvap;
     private int asianvap;
     private int nhpivap;
+    private int totalVap;
     private List<Integer> precincts;
 
     private int countyNum; //TODO: usecase 38
 
-    public District(int hvap, int wvap, int bvap, int aminvap, int asianvap, int nhpivap, List<Integer> precincts) {
+    public District(int hvap, int wvap, int bvap, int aminvap, int asianvap, int nhpivap, int totalvap,List<Integer> precincts) {
         this.hvap = hvap;
         this.wvap = wvap;
         this.bvap = bvap;
         this.aminvap = aminvap;
         this.asianvap = asianvap;
         this.nhpivap = nhpivap;
+        this.totalVap=totalvap;
         this.precincts = precincts;
     }
 

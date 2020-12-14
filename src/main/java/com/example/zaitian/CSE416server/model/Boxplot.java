@@ -16,4 +16,14 @@ public class Boxplot {
     private List<Double> q3s;
     private List<Double> maxs;
 
+    @Override
+    public String toString() {
+        return "Boxplot{" +
+                "mins=" + mins +
+                ", q1s=" + q1s +
+                ", medians=" + medians +
+                ", q3s=" + q3s +
+                ", maxs=" + maxs +
+                '}';
+    }
 }

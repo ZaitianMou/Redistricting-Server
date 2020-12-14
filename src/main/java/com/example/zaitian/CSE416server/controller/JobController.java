@@ -80,10 +80,10 @@ public class JobController {
     @GetMapping("/job/result/{id}")
     public ResponseEntity getJobResult(@PathVariable Long id){
         try{
-            System.out.println("Get job result: "+id);
-            if (!jobHandler.getJob(id).checkResult()){
-                return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
-            }
+            System.out.println("Getting job result: "+id);
+//            if (!jobHandler.getJob(id).checkResult()){
+//                return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
+//            }
             return new ResponseEntity(jobHandler.getJobResult(id),HttpStatus.OK);
         }
         catch (Exception e){

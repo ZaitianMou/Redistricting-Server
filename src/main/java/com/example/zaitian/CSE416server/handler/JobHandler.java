@@ -28,20 +28,20 @@ public class JobHandler {
         jobRepository.deleteById(id);
     }
 
-    public Job cancelJob(long id){
+    public Job cancelJob(long id) throws IOException {
         Job job = getJob(id);
         job.cancelRunning();
         jobRepository.deleteById(id);
         return job;
     }
 
-    public String getJobResult(long id) throws FileNotFoundException {
+    public String getJobResult(long id) throws IOException, InterruptedException {
         Job job = getJob(id);
         return job.getResult(id);
     }
-    public String getBoxplot(long id) throws FileNotFoundException {
-        Job job = getJob(id);
-        return job.getBoxplot(id);
-    }
+//    public String getBoxplot(long id) throws FileNotFoundException {
+//        Job job = getJob(id);
+//        return job.getBoxplot(id);
+//    }
 
 }

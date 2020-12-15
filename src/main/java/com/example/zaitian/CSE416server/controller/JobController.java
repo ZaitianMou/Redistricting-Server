@@ -6,6 +6,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -81,7 +82,7 @@ public class JobController {
     public ResponseEntity getJobResult(@PathVariable Long id){
         try{
             System.out.println("Getting job result: "+id);
-            if (!jobHandler.getJob(id).checkResult()){
+            if (jobHandler.getJob(id).equals("running") && !jobHandler.getJob(id).checkResult()){
                 return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
             }
             return new ResponseEntity(jobHandler.getJobResult(id),HttpStatus.OK);
@@ -95,7 +96,7 @@ public class JobController {
     public ResponseEntity getBoxplot(@PathVariable Long id){
         try{
             System.out.println("Get job boxplot: "+id);
-            if (jobHandler.getJob(id).getStatus().equals("running")){
+            if (jobHandler.getJob(id).getStatus().equals("running") || ! (new File("src/main/resources/boxplot/"+id+"_boxplot.json").isFile()) ){
                 return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
             }
             String s= new String(Files.readAllBytes(Paths.get("src/main/resources/boxplot/"+id+"_boxplot.json")));

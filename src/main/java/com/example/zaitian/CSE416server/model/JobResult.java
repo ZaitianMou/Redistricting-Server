@@ -156,7 +156,7 @@ public class JobResult {
 
         f.add("districtingPlans",plans);
 
-        Path path = Paths.get("src/main/resources/result/"+id+"districting_input.json");
+        Path path = Paths.get("src/main/resources/result/"+id+"_districting_input.json");
         Files.write(path, f.build().toString().getBytes());
         String data_path = null;
         switch(state) {
@@ -173,7 +173,7 @@ public class JobResult {
                 System.out.println("post processing error");
         }
 
-        ProcessBuilder pb = new ProcessBuilder("python3" ,"src/main/resources/script/postprocess.py", data_path, "src/main/resources/result/"+id+"districting_input.json",String.valueOf(id));
+        ProcessBuilder pb = new ProcessBuilder("python3" ,"src/main/resources/script/postprocess.py", data_path, "src/main/resources/result/"+id+"_districting_input.json",String.valueOf(id));
         Process process = pb.start();
         process.waitFor();
         System.out.println("Districtings generated.");
@@ -355,15 +355,15 @@ public class JobResult {
         for (int i = 0; i < districtingPlans.get(0).getDistricts().size(); i++) {
             double[] col = new double[districtingPlans.size()];
             for (int j = 0; j < districtingPlans.size(); j++) {
+                District d=districtingPlans.get(j).getDistricts().get(i);
                 switch (minority) {
-                    case H: col[j] = districtingPlans.get(j).getDistricts().get(i).getHvap();       break;
-                    case W: col[j] = districtingPlans.get(j).getDistricts().get(i).getWvap();       break;
-                    case B: col[j] = districtingPlans.get(j).getDistricts().get(i).getBvap();       break;
-                    case AMIN: col[j] = districtingPlans.get(j).getDistricts().get(i).getAminvap();       break;
-                    case ASIAN: col[j] = districtingPlans.get(j).getDistricts().get(i).getAsianvap();       break;
-                    case NHPI: col[j] = districtingPlans.get(j).getDistricts().get(i).getNhpivap();       break;
+                    case H: col[j] = (double)d.getHvap()/d.getTotalVap();       break;
+                    case W: col[j] = (double)d.getWvap()/d.getTotalVap();       break;
+                    case B: col[j] = (double)d.getBvap()/d.getTotalVap();       break;
+                    case AMIN: col[j] = (double)d.getAminvap()/d.getTotalVap();       break;
+                    case ASIAN: col[j] = (double)d.getAsianvap()/d.getTotalVap();       break;
+                    case NHPI: col[j] = (double)d.getNhpivap()/d.getTotalVap();       break;
                 }
-
             }
             mins.add(Quantiles.percentiles().index(0).compute(col));
             q1s.add(Quantiles.percentiles().index(25).compute(col));

@@ -48,11 +48,9 @@ public class Job {
     }
 
     public void cancelRunning() throws IOException {
-        //TODO: call the server or seawulf to cancel
         if (getNumberOfDistrictings() < Configuration.runningLocationThreshold){
-
+            // remove job from db
         }
-
         else{
             ProcessBuilder process= new ProcessBuilder("src/main/resources/script/trigger_cancel.sh", String.valueOf(this.slurmID));
             Process ps = process.start();
@@ -67,7 +65,36 @@ public class Job {
         this.setStatus("running");
         //TODO: call the server or seawulf to start the job
         if (getNumberOfDistrictings() < Configuration.runningLocationThreshold){
+            StringBuilder state_file = new StringBuilder();
+            state_file.append("_refined.json");
+            int numberOfDistricting=0;
+            switch(this.state) {
+                case "GA":
+                    state_file.insert(0, "src/main/java/resources/data/GA/GA");
+                    numberOfDistricting=Configuration.GA_number_of_district;
+                    break;
+                case "TX":
+                    state_file.insert(0, "src/main/java/resources/data/TX/TX");
+                    numberOfDistricting=Configuration.TX_number_of_district;
+                    break;
+                case "VA":
+                    state_file.insert(0, "src/main/java/resources/data/VA/VA");
+                    numberOfDistricting=Configuration.VA_number_of_district;
+                    break;
+                default:
+                    break;
+            }
+            try {
+                ProcessBuilder process = new ProcessBuilder("python", "src/main/resources/script/algorithm", state_file.toString(),
+                        String.valueOf(this.populationDiffLimit), String.valueOf(this.compactnessLimit), String.valueOf(numberOfDistricting));
 
+                File log = new File("src/main/resources/result/redistrict.log");
+                process.redirectOutput(ProcessBuilder.Redirect.appendTo(log));
+                process.start();
+                this.slurmID=0;
+            }catch (Exception e){
+                System.out.println("Error when startRunning!");
+            }
         }
         else{
             StringBuilder state_file = new StringBuilder();
@@ -108,7 +135,21 @@ public class Job {
     }
     public boolean checkResult(){
         if (getNumberOfDistrictings() < Configuration.runningLocationThreshold){
-
+            try {
+                String str = new String(Files.readAllBytes(Paths.get("src/main/resources/result/redistrict.log")), StandardCharsets.UTF_8);
+                if(str.length() < 100) {
+                    System.out.println("Job "+this.id + " is still running.");
+                    return false;
+                }
+                else {
+                    str = "[" + str.substring(str.indexOf("{"));
+                    str= str.substring(0,str.length()-2)+"]";
+                    PrintWriter out = new PrintWriter("src/main/resources/result/redistrict_revised.json");
+                    out.print(str);
+                    return true;
+                }
+            }
+            catch (Exception e) {}
         }
         else{
             ProcessBuilder process= new ProcessBuilder("src/main/resources/script/trigger_getresult.sh");
@@ -180,13 +221,6 @@ public class Job {
             return new String(Files.readAllBytes(Paths.get("src/main/resources/districting/"+id+"_districtings.json")), StandardCharsets.UTF_8);
         }
     }
-
-    //precondition: already finished.
-//    public String getBoxplot(long id) throws FileNotFoundException {
-//
-//        System.out.println(this.jobResult);
-//        return this.jobResult.generateBoxplotJson();
-//    }
 }
 
 enum Minority{

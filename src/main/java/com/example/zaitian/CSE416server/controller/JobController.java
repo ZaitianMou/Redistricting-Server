@@ -81,9 +81,9 @@ public class JobController {
     public ResponseEntity getJobResult(@PathVariable Long id){
         try{
             System.out.println("Getting job result: "+id);
-//            if (!jobHandler.getJob(id).checkResult()){
-//                return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
-//            }
+            if (!jobHandler.getJob(id).checkResult()){
+                return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
+            }
             return new ResponseEntity(jobHandler.getJobResult(id),HttpStatus.OK);
         }
         catch (Exception e){
@@ -98,7 +98,7 @@ public class JobController {
             if (jobHandler.getJob(id).getStatus().equals("running")){
                 return new ResponseEntity("Still running.",HttpStatus.NO_CONTENT);
             }
-            String s= new String(Files.readAllBytes(Paths.get("src/main/resources/boxplot/boxplot.json")));
+            String s= new String(Files.readAllBytes(Paths.get("src/main/resources/boxplot/"+id+"_boxplot.json")));
             return new ResponseEntity(s,HttpStatus.OK);
         }
         catch (Exception e){

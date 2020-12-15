@@ -23,7 +23,7 @@ file = ""
 
 # INPUTS
 iterationLimit = 500
-requestedNumOfDistricts = 14
+requestedNumOfDistricts = 0
 
 populationVariation = 0.05
 compactnessThreshold = 0.45
@@ -286,6 +286,8 @@ if __name__ == '__main__':
     file = sys.argv[1]
     populationVariation = float(sys.argv[2])
     compactnessThreshold = float(sys.argv[3])
+    requestedNumOfDistricts=int(sys.argv[4])
+
     start_time = time.time()
     data = ''
     with open(file, "r") as read_file:

@@ -10,7 +10,11 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 
 public class Configuration {
-    static int runningLocationThreshold=1000;
+    static int runningLocationThreshold=50;
+
+    static int GA_number_of_district=14;
+    static int TX_number_of_district=36;
+    static int VA_number_of_district=11;
 
     static double[] GA_enacted_HVAP={0.03973174, 0.04033963, 0.04348762, 0.04509905, 0.04875173, 0.04912897, 0.06915873, 0.08114326, 0.08143435, 0.08614449, 0.08964913, 0.092645, 0.11979757, 0.16802885};
     static double[] GA_enacted_WVAP={0.30949218, 0.317314, 0.34600425, 0.45106517, 0.5298482, 0.59925328, 0.63773316, 0.64656002, 0.64813262, 0.69123609, 0.70966726, 0.71913447, 0.81986938, 0.82617094};

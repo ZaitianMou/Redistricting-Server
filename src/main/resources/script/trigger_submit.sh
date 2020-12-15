@@ -1,1 +1,1 @@
-cat src/main/resources/script/seawulf.slurm; echo $1 | ssh zmou@login.seawulf.stonybrook.edu 'source /etc/profile.d/modules.sh; module load slurm; module load anaconda/3; sbatch'
+(cat src/main/resources/script/seawulf.slurm; echo $1) | ssh zmou@login.seawulf.stonybrook.edu 'source /etc/profile.d/modules.sh; module load slurm; module load anaconda/3; sbatch'

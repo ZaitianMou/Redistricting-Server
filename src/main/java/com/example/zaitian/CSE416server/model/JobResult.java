@@ -18,10 +18,15 @@ import javax.json.*;
 public class JobResult {
     private List<DistrictingPlan> districtingPlans;
     private Boxplot hBoxplot, wBoxplot, bBoxplot, aminBoxplot, asianBoxplot, nhpiBoxplot;
-    private int indexOfAverageDistricting, indexOfExtremeDistricting, indexOfRandomDistricting;
+    private int indexOfAverageDistricting, indexOfExtremeDistricting, indexOfRandomDistricting,indexOfSecondRandomDistricting;
     private double[] enactedHVAP, enactedWVAP, enactedBVAP, enactedAminVAP, enactedAsianVAP, enactedNHPIVAP;
 
-    public JobResult(List<DistrictingPlan> plans,String state){
+    private String state;
+    private double compactnessLimit;
+    private double populationDiffLimit;
+    private long id;
+
+    public JobResult(List<DistrictingPlan> plans,String state, double compactnessLimit, double populationDiffLimit,long id){
         if (state.equals("GA")) {
             enactedHVAP = Configuration.GA_enacted_HVAP;
             enactedWVAP = Configuration.GA_enacted_WVAP;
@@ -49,8 +54,13 @@ public class JobResult {
         else
             System.out.println("!!!!!!!BUG");
         districtingPlans=plans;
+        this.state=state;
+        this.compactnessLimit=compactnessLimit;
+        this.populationDiffLimit=populationDiffLimit;
+        this.id=id;
+
     }
-    public void processResult(String state) throws IOException, InterruptedException {
+    public void processResult() throws IOException, InterruptedException {
         System.out.println("\n===Set Boxplots===");
         setBoxPlot(Minority.H);
         setBoxPlot(Minority.W);
@@ -60,47 +70,81 @@ public class JobResult {
         setBoxPlot(Minority.NHPI);
 
         exportBoxplotJson();
+
         System.out.println("\n===Determine DistrictingPlan===");
         determineDistricting();
         //TODO export districting
 
         System.out.println("\n===Calculate number of counties in each district===");
-        calculateNumberOfCounties(state);
+        calculateNumberOfCounties();
 
         System.out.println("\n===Generating districting jsons===");
-        getDistrictsGeojson(state);
+        getDistrictsGeojson();
 
         System.out.println("\n===Generating job summary json===");
-//        generateJobSummaryJson(state);
+//        generateJobSummaryJson();
 
     }
-    public void generateJobSummaryJson(String state){
+    public void generateJobSummaryJson(){
         JsonObjectBuilder summary= Json.createObjectBuilder();
-        summary.add("state",state);
+        summary.add("state",this.state);
         JsonObjectBuilder precinctsWrapper=Json.createObjectBuilder();
 
-        //precincts
-//        precinctsWrapper.add("type","FeatureCollection");
-//        precinctsWrapper.add("description",state+" State Precincts");
-//        JsonObjectBuilder precincts=Json.createObjectBuilder();
-//        for (int i=0;i<;i++){
-//            JsonObjectBuilder precinct=Json.createObjectBuilder();
-//            precinct.add("type","Feature");
-//            JsonObjectBuilder precinctProporty=Json.createObjectBuilder();
-//            precinctProporty.add("precinct",)
-//
-//        }
-//        precinctsWrapper.add("features",precincts);
-
+        //precincts: manully copy and paste
 
         summary.add("precinctsGeoJson",precinctsWrapper);
         summary.add("averageDistricting",indexOfAverageDistricting);
         summary.add("extremeDistricting",indexOfExtremeDistricting);
         summary.add("randomDistricting",indexOfRandomDistricting);
+        summary.add("secondRandomDistricting",indexOfSecondRandomDistricting);
+        JsonArrayBuilder districtingArray=Json.createArrayBuilder();
+        districtingArray.add(getDistrictingObjectForSummary(indexOfAverageDistricting));
+        districtingArray.add(getDistrictingObjectForSummary(indexOfExtremeDistricting));
+        districtingArray.add(getDistrictingObjectForSummary(indexOfRandomDistricting));
+        districtingArray.add(getDistrictingObjectForSummary(indexOfSecondRandomDistricting));
 
+        summary.add("districtings",districtingArray);
+        System.out.println(summary.build());
+    }
+    public JsonObjectBuilder getDistrictingObjectForSummary(int index){
+        //add averageDistricting
+        JsonObjectBuilder districtingJson=Json.createObjectBuilder();
+        DistrictingPlan average=districtingPlans.get(index);
+        districtingJson.add("districtingID",index);
+        districtingJson.add("compactnessLimit", this.compactnessLimit);
+        districtingJson.add("populationDifferenceLimit", this.populationDiffLimit);
+
+        JsonObjectBuilder congressionDistrictsGeoJSON=Json.createObjectBuilder();
+        congressionDistrictsGeoJSON.add("type","FeatureCollection");
+        congressionDistrictsGeoJSON.add("description","Congressional Districts");
+        JsonArrayBuilder districts=Json.createArrayBuilder();
+        for (int i=0;i<average.getDistricts().size();i++){
+            JsonObjectBuilder district=Json.createObjectBuilder();
+            district.add("districtID",i);
+            district.add("differentConuties",average.getDistricts().get(i).getCountyNum());
+            district.add("AminVAP",average.getDistricts().get(i).getAminvap());
+            district.add("AsianVAP",average.getDistricts().get(i).getAsianvap());
+            district.add("BVAP",average.getDistricts().get(i).getBvap());
+            district.add("HVAP",average.getDistricts().get(i).getHvap());
+            district.add("NhpiVAP",average.getDistricts().get(i).getNhpivap());
+            district.add("WVAP",average.getDistricts().get(i).getWvap());
+            district.add("VAP",average.getDistricts().get(i).getTotalVap());
+
+            JsonArrayBuilder precincts=Json.createArrayBuilder();
+            for (int j=0;j<average.getDistricts().get(i).getPrecincts().size();j++){
+                precincts.add((int)average.getDistricts().get(i).getPrecincts().get(j));
+            }
+            district.add("precincts:",precincts);
+            districts.add(district);
+        }
+        congressionDistrictsGeoJSON.add("features",districts);
+        congressionDistrictsGeoJSON.add("geometry","Displayed in the presentation.");
+        districtingJson.add("congressionalDistrictsGeoJSON",congressionDistrictsGeoJSON);
+
+        return districtingJson;
     }
 
-    public void getDistrictsGeojson(String state) throws IOException, InterruptedException {
+    public void getDistrictsGeojson() throws IOException, InterruptedException {
         //get calculate districting info
         JsonObjectBuilder f= Json.createObjectBuilder();
         f.add("state",state);
@@ -108,11 +152,11 @@ public class JobResult {
         plans.add(getPlanJsonObject(indexOfAverageDistricting));
         plans.add(getPlanJsonObject(indexOfExtremeDistricting));
         plans.add(getPlanJsonObject(indexOfRandomDistricting));
-        plans.add(getPlanJsonObject(indexOfRandomDistricting+1));
+        plans.add(getPlanJsonObject(indexOfSecondRandomDistricting));
 
         f.add("districtingPlans",plans);
 
-        Path path = Paths.get("src/main/resources/result/districting_input.json");
+        Path path = Paths.get("src/main/resources/result/"+id+"districting_input.json");
         Files.write(path, f.build().toString().getBytes());
         String data_path = null;
         switch(state) {
@@ -129,7 +173,7 @@ public class JobResult {
                 System.out.println("post processing error");
         }
 
-        ProcessBuilder pb = new ProcessBuilder("python3" ,"src/main/resources/script/postprocess.py", data_path, "src/main/resources/result/districting_input.json");
+        ProcessBuilder pb = new ProcessBuilder("python3" ,"src/main/resources/script/postprocess.py", data_path, "src/main/resources/result/"+id+"districting_input.json",String.valueOf(id));
         Process process = pb.start();
         process.waitFor();
         System.out.println("Districtings generated.");
@@ -149,7 +193,7 @@ public class JobResult {
         plan.add("districts",districts);
         return plan;
     }
-    public void calculateNumberOfCounties(String state) throws IOException {
+    public void calculateNumberOfCounties() throws IOException {
         HashMap<Integer,String> map=Configuration.generatePrecinctCountyMapping(state);
         System.out.println("Total counties: "+(new HashSet<>(map.values())).toString());
         for(int i=0;i<districtingPlans.size();i++){
@@ -158,6 +202,7 @@ public class JobResult {
                 for (int precinct:districtingPlans.get(i).getDistricts().get(j).getPrecincts()){
                     set.add(map.get(precinct));
                 }
+                this.getDistrictingPlans().get(i).getDistricts().get(j).setCountyNum(set.size());
                 System.out.println("Districting "+(i+1)+" District "+(j+1)+" has "+set.size()+" counties: "+set);
             }
         }
@@ -198,15 +243,20 @@ public class JobResult {
         int indexOfSmallest=getIndexOfSmallest(SDs);
         int indexOfLargest=getIndexOfLargest(SDs);
         int indexOfRandom=(int)Math.floor(Math.random()*districtingPlans.size());
+        int indexOfSecondRandomDistricting=(int)Math.floor(Math.random()*districtingPlans.size());
+
         setIndexOfAverageDistricting(indexOfSmallest);
         setIndexOfExtremeDistricting(indexOfLargest);
         setIndexOfRandomDistricting(indexOfRandom);
+        setIndexOfSecondRandomDistricting(indexOfSecondRandomDistricting);
 
         System.out.println("Average DistrictingPlan: "+districtingPlans.get(indexOfSmallest));
         System.out.println("   With Standard deviation: "+SDs[indexOfSmallest]);
         System.out.println("Extreme DistrictingPlan: "+districtingPlans.get(indexOfLargest));
         System.out.println("   With Standard deviation: "+SDs[indexOfLargest]);
         System.out.println("Random DistrictingPlan: "+districtingPlans.get(indexOfRandom));
+        System.out.println("   With Standard deviation: "+SDs[indexOfRandom]);
+        System.out.println("Second Random DistrictingPlan: "+districtingPlans.get(indexOfSecondRandomDistricting));
         System.out.println("   With Standard deviation: "+SDs[indexOfRandom]);
     }
 
@@ -221,7 +271,7 @@ public class JobResult {
         outputObject.add("WHITE",getMinorityBoxplot(Minority.W));
 
         // then write it into the local file directory
-        OutputStream os = new FileOutputStream("src/main/resources/boxplot/boxplot.json");
+        OutputStream os = new FileOutputStream("src/main/resources/boxplot/"+id+"_boxplot.json");
         JsonWriter jsonWriter = Json.createWriter(os);
         jsonWriter.writeObject(outputObject.build());
         jsonWriter.close();

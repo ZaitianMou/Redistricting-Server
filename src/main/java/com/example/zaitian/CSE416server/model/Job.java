@@ -33,9 +33,6 @@ public class Job {
     @Column(name="status")
     private String status; // "running","finished"
 
-    @Column(name="result_location")
-    private String resultLocation;
-
     @Transient
     private JobResult jobResult;
 
@@ -72,33 +69,42 @@ public class Job {
         if (getNumberOfDistrictings() < Configuration.runningLocationThreshold){
 
         }
-
         else{
             StringBuilder state_file = new StringBuilder();
             state_file.append("_refined.json");
+            int numberOfDistricting=0;
             switch(this.state) {
                 case "GA":
                     state_file.insert(0, "GA");
+                    numberOfDistricting=Configuration.GA_number_of_district;
                     break;
                 case "TX":
                     state_file.insert(0, "TX");
+                    numberOfDistricting=Configuration.TX_number_of_district;
                     break;
                 case "VA":
                     state_file.insert(0, "VA");
+                    numberOfDistricting=Configuration.VA_number_of_district;
                     break;
                 default:
                     break;
             }
-            String plans = "mpirun -np " + String.valueOf(this.numberOfDistrictings) + " python algorithm.py" + " " + state_file.toString()
-                    + " " + String.valueOf(this.populationDiffLimit) + " " + String.valueOf(this.compactnessLimit);
-            ProcessBuilder process= new ProcessBuilder("src/main/resources/script/trigger_submit.sh", plans);
-            Process ps = process.start();
-            BufferedReader reader = new BufferedReader(new InputStreamReader(ps.getInputStream()));
-            String retval = reader.readLine();
-            this.slurmID=Integer.parseInt(retval.split(" ")[3]);
-            System.out.println(retval);
-        }
+            try {
+                String plans = "mpirun -np " + this.numberOfDistrictings + " python algorithm.py" + " " + state_file.toString()
+                        + " " + this.populationDiffLimit + " " + this.compactnessLimit + " " + numberOfDistricting;
+                ProcessBuilder process = new ProcessBuilder("src/main/resources/script/trigger_submit.sh", plans);
+                Process ps = process.start();
+                ps.waitFor();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(ps.getInputStream()));
+                String s=reader.readLine();
+                System.out.println(s);
+                this.slurmID=Integer.parseInt(s.split(" ")[3]);
+            }catch (Exception e){
+                System.out.println("Error when startRunning!");
+                System.out.println(e.getMessage());
+            }
 
+        }
     }
     public boolean checkResult(){
         if (getNumberOfDistrictings() < Configuration.runningLocationThreshold){
@@ -116,9 +122,8 @@ public class Job {
                     String str = new String(Files.readAllBytes(Paths.get("src/main/resources/result/redistrict.log")), StandardCharsets.UTF_8);
                     str = "[" + str.substring(str.indexOf("{"));
                     str= str.substring(0,str.length()-2)+"]";
-                    PrintWriter out = new PrintWriter("src/main/resources/result/test.json");
+                    PrintWriter out = new PrintWriter("src/main/resources/result/redistrict_revised.json");
                     out.print(str);
-//                    System.out.println("File: " + str);
                 }
                 else {
                     System.out.println("Job "+this.id + " is still running.");
@@ -134,43 +139,46 @@ public class Job {
     }
     //precondition: already finished.
     public String getResult(long id) throws IOException, InterruptedException {
-        //Read result
-        JsonReader reader = Json.createReader(new FileInputStream("src/main/resources/result/redistrict-lastest.json"));
-//        JsonObject file = reader.readObject();
-        JsonArray file =reader.readArray();
-//        JsonArray districtingPlansJson=file.getJsonArray("districtingPlans");
-
-        List<DistrictingPlan> plans = new ArrayList<>();
-        for (int i=0;i<file.size();i++) {
-            JsonObject districtingJson=file.getJsonObject(i);
-            JsonArray districtsJson = districtingJson.getJsonArray("districts");
-//            JsonNumber districtingPlanID = districtingJson.getJsonNumber("districtingPlanID");
-            List<District> districts = new ArrayList<>();
-            for (int j = 0; j < districtsJson.size(); j++) {
-                JsonObject districtJson = districtsJson.getJsonObject(j);
-                int hvap = districtJson.getJsonNumber("HVAP").intValue();
-                int wvap = districtJson.getJsonNumber("WVAP").intValue();
-                int bvap = districtJson.getJsonNumber("BVAP").intValue();
-                int aminvap = districtJson.getJsonNumber("AMINVAP").intValue();
-                int asianvap = districtJson.getJsonNumber("ASIANVAP").intValue();
-                int nhpivap = districtJson.getJsonNumber("NHPIVAP").intValue();
-                int totalvap=hvap+wvap+bvap+aminvap+asianvap+nhpivap;
-                JsonArray precincts = districtJson.getJsonArray("precincts");
-                List<Integer> l = new ArrayList<>();
-                for (JsonNumber p : precincts.getValuesAs(JsonNumber.class)) {
-                    l.add(p.intValue());
-                }
-                districts.add(new District(hvap, wvap, bvap, aminvap, asianvap, nhpivap,totalvap, l));
-            }
-            DistrictingPlan plan = new DistrictingPlan( (i+1),districts);
-            System.out.println(plan.toString());
-            plans.add(plan);
+        //decide if file already exist
+        if (new File("src/main/resources/districting/"+id+"_districtings.json").isFile()){
+            String str = new String(Files.readAllBytes(Paths.get("src/main/resources/districting/"+id+"_districtings.json")), StandardCharsets.UTF_8);
+            return str;
         }
-        JobResult result=new JobResult(plans,this.getState());
-        this.jobResult=result;
-        jobResult.processResult(state);
+        else {
+            //Read result
+            JsonReader reader = Json.createReader(new FileInputStream("src/main/resources/result/redistrict_revised.json"));
+            JsonArray file = reader.readArray();
+            List<DistrictingPlan> plans = new ArrayList<>();
+            for (int i = 0; i < file.size(); i++) {
+                JsonObject districtingJson = file.getJsonObject(i);
+                JsonArray districtsJson = districtingJson.getJsonArray("districts");
+                List<District> districts = new ArrayList<>();
+                for (int j = 0; j < districtsJson.size(); j++) {
+                    JsonObject districtJson = districtsJson.getJsonObject(j);
+                    int hvap = districtJson.getJsonNumber("HVAP").intValue();
+                    int wvap = districtJson.getJsonNumber("WVAP").intValue();
+                    int bvap = districtJson.getJsonNumber("BVAP").intValue();
+                    int aminvap = districtJson.getJsonNumber("AMINVAP").intValue();
+                    int asianvap = districtJson.getJsonNumber("ASIANVAP").intValue();
+                    int nhpivap = districtJson.getJsonNumber("NHPIVAP").intValue();
+                    int totalvap = hvap + wvap + bvap + aminvap + asianvap + nhpivap;
+                    JsonArray precincts = districtJson.getJsonArray("precincts");
+                    List<Integer> l = new ArrayList<>();
+                    for (JsonNumber p : precincts.getValuesAs(JsonNumber.class)) {
+                        l.add(p.intValue());
+                    }
+                    districts.add(new District(hvap, wvap, bvap, aminvap, asianvap, nhpivap, totalvap, l));
+                }
+                DistrictingPlan plan = new DistrictingPlan((i + 1), districts);
+                System.out.println(plan.toString());
+                plans.add(plan);
+            }
+            JobResult result = new JobResult(plans, this.state, this.compactnessLimit, this.populationDiffLimit,this.id);
+            this.jobResult = result;
+            jobResult.processResult();
 
-        return "";
+            return new String(Files.readAllBytes(Paths.get("src/main/resources/districting/"+id+"_districtings.json")), StandardCharsets.UTF_8);
+        }
     }
 
     //precondition: already finished.

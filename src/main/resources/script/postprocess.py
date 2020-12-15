@@ -26,5 +26,5 @@ if __name__ == '__main__':
         data = json.loads(precinct_data_c.to_json())
         plan[key] = data
     f.close()
-    with open("src/main/resources/districting/districtings.json", "w") as outfile:
+    with open("src/main/resources/districting/"+str(sys.argv[3])+"_districtings.json", "w") as outfile:
         json.dump(plan, outfile)
